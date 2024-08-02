@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Powered Story Teller</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "VT323", monospace;
+      background-color: #0a0a0a;
+      color: #00ff00;
+      overflow-x: hidden;
+    }
+
+    .cosmic-pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .neuron-spark {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #00ffff;
+      border-radius: 50%;
+      animation: spark 1.5s linear infinite;
+    }
+
+    @keyframes spark {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-100px) translateX(100px);
+        opacity: 0;
+      }
+    }
+
+    .cyber-input {
+      background: #000;
+      border: 2px solid #00ff00;
+      color: #00ff00;
+      font-family: "Orbitron", sans-serif;
+    }
+
+    .cyber-input:focus {
+      outline: none;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .loading-dots::after {
+      content: "...";
+      display: inline-block;
+      animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+      0% {
+        transform: translateY(0);
+      }
+
+      25% {
+        transform: translateY(-6px);
+      }
+
+      50% {
+        transform: translateY(0);
+      }
+
+      75% {
+        transform: translateY(6px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+  </style>
+  <script>
+    function fetchGeneratedText() {
+      const output = document.getElementById("story-output");
+      const outputText = document.getElementById("story-output-text");
+
+      output.innerHTML = `<h3 class="text-2xl font-bold mb-4 font-['Orbitron']">Your Story:</h3><p id="story-output-text" class="text-lg loading-dots">Generating your story</p>`;
+
+      const form = document.getElementById("story-form");
+      const formData = new FormData(form);
+
+      setTimeout(() => {
+        fetch("/generate", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            output.innerHTML = `
+            <h3 class="text-2xl font-bold mb-4 font-['Orbitron']">Your Story:  <button onclick="toggleSpeech()" class="bg-blue-500 text-black font-bold p-2 rounded-full hover:bg-blue-700 transition-all duration-300" style="margin-left: 25px">
+                <i id="speaker-icon" class="fas fa-volume-up text-xl"></i>
+              </button></h3>
+            <div class="flex items-center justify-between mb-4">
+              <p id="story-output-text" class="text-lg flex-grow mr-4">${data.text}</p>
+            </div>
+          `;
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            output.innerHTML = `<h3 class="text-2xl font-bold mb-4 font-['Orbitron']">Your Story:</h3><p id="story-output-text" class="text-lg">An error occurred while generating your story. Please try again.</p>`;
+          });
+      }, 3000);
+    }
+
+    function smoothScroll(target) {
+      document.querySelector(target).scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          smoothScroll(this.getAttribute("href"));
+        });
+      });
+
+      document.getElementById("story-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        smoothScroll("#output");
+      });
+    });
+  </script>
+  <script>
+    // Audio recording for Speech-to-Text
+    let mediaRecorder;
+    let audioChunks = [];
+
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start();
+
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            audioChunks = [];
+            sendAudioToBackend(audioBlob);
+          };
+        })
+        .catch(error => {
+          console.error("Error accessing microphone:", error);
+        });
+    }
+
+    function stopRecording() {
+      mediaRecorder.stop();
+    }
+
+    function sendAudioToBackend(audioBlob) {
+      const formData = new FormData();
+      formData.append('audio_data', audioBlob);
+
+      fetch('/speech-to-text', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("topic").value = data.text;
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+    }
+
+    function toggleRecording() {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording();
+        isRecording = false;
+      } else {
+        startRecording();
+        isRecording = true;
+      }
+      updateMicIcon();
+    }
+
+    function updateMicIcon() {
+      const micIcon = document.getElementById("micIcon");
+      if (isRecording) {
+        micIcon.classList.remove("fa-microphone");
+        micIcon.classList.add("fa-stop");
+      } else {
+        micIcon.classList.remove("fa-stop");
+        micIcon.classList.add("fa-microphone");
+      }
+    }
+
+    // Fetching text-to-speech audio from the backend
+    let isSpeaking = false;
+    let audio = null;
+
+    function toggleSpeech() {
+      const storyText = document.getElementById("story-output-text").textContent;
+      const textSize = document.getElementsByName("length");
+      if (!isSpeaking) {
+        fetch('/text-to-speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text: storyText })
+        })
+          .then(response => response.blob())
+          .then(blob => {
+            const audioUrl = URL.createObjectURL(blob);
+            audio = new Audio(audioUrl);
+            isSpeaking = true;
+            audio.play().then(() => {
+              updateSpeakerIcon();
+
+              audio.addEventListener('ended', () => {
+                isSpeaking = false;
+                updateSpeakerIcon();
+              });
+            }).catch(error => {
+              console.error("Error playing audio:", error);
+            });
+          })
+          .catch(error => {
+            console.error("Error fetching audio:", error);
+          });
+      } else {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+          isSpeaking = false;
+          updateSpeakerIcon();
+        } else {
+          console.error("No audio object found to pause.");
+        }
+      }
+    }
+
+    function updateSpeakerIcon() {
+      // Update the speaker icon based on the isSpeaking state
+      const speakerIcon = document.getElementById("speaker-icon");
+      if (isSpeaking) {
+        speakerIcon.classList.remove("fa-volume-up");
+        speakerIcon.classList.add("fa-volume-mute");
+      } else {
+        speakerIcon.classList.remove("fa-volume-mute");
+        speakerIcon.classList.add("fa-volume-up");
+      }
+    }
+  </script>
+
+</head>
+
+<body class="text-green-400">
+  <div id="star-field" class="fixed top-0 left-0 w-full h-full z-0"></div>
+
+  <header class="relative z-10 p-4">
+    <nav class="flex flex-wrap justify-between items-center">
+      <a href="#get-started"
+        class="text-2xl md:text-4xl font-bold font-['Orbitron'] text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">AI-Powered
+        StoryTeller</a>
+      <div class="space-x-2 md:space-x-4 mt-2 md:mt-0">
+        <a href="#prompt-lab" class="hover:text-pink-400 transition-colors duration-300">Generate</a>
+        <a href="#output"
+          class="bg-gradient-to-r from-purple-500 to-pink-500 text-black px-4 py-2 rounded-full hover:from-green-400 hover:to-blue-500 transition-all duration-300">Output:
+          Story</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="relative z-10">
+    <section id="get-started" class="min-h-screen flex items-center justify-center">
+      <div class="text-center cosmic-pulse px-4">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 font-['Orbitron']">AI-Powered Story Teller</h1>
+        <p class="text-lg md:text-xl mb-8">Want to learn by reading stories, but can't find a storyteller? No worries,
+          just click to get started!</p>
+        <a href="#prompt-lab"
+          class="bg-blue-500 text-black font-bold text-xl py-3 px-8 rounded-full hover:bg-green-400 transition-all duration-300 transform hover:rotate-3">Generate
+          Your Story</a>
+      </div>
+    </section>
+
+    <section id="prompt-lab" class="py-16">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="bg-gray-900 bg-opacity-70 p-8 rounded-lg shadow-neon">
+          <h2 class="text-3xl font-bold mb-6 text-center font-['Orbitron']">Generate Your Story</h2>
+          <form id="story-form" class="space-y-6" onsubmit="event.preventDefault(); fetchGeneratedText();">
+            <div class="flex items-center space-x-4">
+              <input id="topic" type="text" name="topic" class="w-full cyber-input rounded px-3 py-2"
+                placeholder="Enter your topic..." />
+              <button type="button" onclick="toggleRecording()"
+                class="bg-green-500 text-black font-bold p-2 rounded-full hover:bg-green-700 transition-all duration-300">
+                <i id="micIcon" class="fas fa-microphone text-xl"></i>
+              </button>
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-2">Age Group:</label>
+              <div class="flex flex-wrap justify-between">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="age" value="2-10" class="form-radio text-green-500" />
+                  <span class="ml-2">2-10</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="age" value="11-15" class="form-radio text-green-500" />
+                  <span class="ml-2">11-15</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="age" value="16-18" class="form-radio text-green-500" />
+                  <span class="ml-2">16-17</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="age" value="19-21" class="form-radio text-green-500" />
+                  <span class="ml-2">18 and above</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-bold mb-2">Story Length:</label>
+              <div class="flex flex-wrap justify-between">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="length" value="short" class="form-radio text-green-500" />
+                  <span class="ml-2">Short</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="length" value="medium" class="form-radio text-green-500" />
+                  <span class="ml-2">Medium</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="length" value="long" class="form-radio text-green-500" />
+                  <span class="ml-2">Long</span>
+                </label>
+              </div>
+            </div>
+            <div class="text-center">
+              <button type="submit" onclick="smoothScroll('#output')"
+                class="bg-gradient-to-r from-green-400 to-blue-500 text-black font-bold py-2 px-6 rounded-full hover:from-pink-500 hover:to-yellow-500 transition-all duration-300 transform hover:skew-x-2">
+                Generate Story
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="output" class="py-16">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="bg-gray-900 bg-opacity-70 p-8 rounded-lg shadow-neon" id="story-output">
+          <!-- Output will be inserted here by JavaScript -->
+          <h3 class="text-2xl font-bold mb-4 font-['Orbitron']">
+            Your Story:
+          </h3>
+          <p id="story-output-text" class="text-lg">
+            Your generated story will appear here...
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative z-10 p-4 text-center">
+    <p>&copy; 2024 AI-Powered Story Teller. All rights reserved.</p>
+  </footer>
+  <script>
+    // Create a starry background
+    const starField = document.getElementById("star-field");
+    for (let i = 0; i < 200; i++) {
+      const star = document.createElement("div");
+      star.className = "neuron-spark";
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.animationDelay = `${Math.random() * 2}s`;
+      starField.appendChild(star);
+    }
+  </script>
+</body>
+
+</html>
