@@ -86,10 +86,11 @@ This project can be deployed using Google Cloud Run. Follow these steps:
     cd AI-Powered-StoryTeller
     gcloud run deploy --source=.
     ```
+    It will prompt you to enter a name for your service, let's say "ai". Choose the corresponding number for the region "us-central1"(Choose your preferred location). Say "y" when it asks if you want to allow unauthenticated invocations. Note that we are allowing unauthenticated access here because this is a demo application. Recommendation is to use appropriate authentication for your enterprise and production applications.
 
-3. **Follow the command prompts to complete the deployment**
-    
-    You will be asked about your deployment name, location and 
+   Once the deployment is complete, you should get a link similar to the one below:
+
+   https://ai-*****eua-uc.a.run.app/
 
 ## Usage
 
