@@ -78,14 +78,15 @@ AI-Powered Story Teller is a web application that generates educational stories 
 
 This project can be deployed using Google Cloud Run. Follow these steps:
 
-1. **Build and deploy the service**
+- **Build and deploy the service**
 
    In Google Cloud terminal
-
+   
     ```sh
     cd AI-Powered-StoryTeller
     gcloud run deploy --source=.
     ```
+
     It will prompt you to enter a name for your service, let's say "ai". Choose the corresponding number for the region "us-central1"(Choose your preferred location). Say "y" when it asks if you want to allow unauthenticated invocations. Note that we are allowing unauthenticated access here because this is a demo application. Recommendation is to use appropriate authentication for your enterprise and production applications.
 
    Once the deployment is complete, you should get a link similar to the one below:
