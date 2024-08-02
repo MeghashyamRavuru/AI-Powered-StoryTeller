@@ -19,38 +19,58 @@ AI-Powered Story Teller is a web application that generates educational stories 
 ### Prerequisites
 
 - Python 3.10 or higher
-- Google Cloud account
+- Google Cloud account with billing enabled
 - Google Cloud SDK
 
 ### Steps
 
-1. **Clone the repository**
+1. **Install [Google Cloud Cli](https://cloud.google.com/sdk/docs/downloads-snap)**
+    ```sh
+    snap install google-cloud-cli --classic
+    gcloud init
+    ```
+    Afterward, you will be prompted to sign in and sign in with your Google Cloud account. Now choose your billing-linked project or create a new project and link with a billing-enabled account.
+   ```sh
+   gcloud auth application-default login
+   ```
+   Again you will prompted to sign in with your Google Cloud account. Complete the sign-in.
+
+3. **Clone the repository**
 
     ```sh
-    git clone https://github.com/yourusername/AI-Powered-StoryTeller.git
+    git clone https://github.com/MeghashyamRavuru/AI-Powered-StoryTeller.git
     cd AI-Powered-StoryTeller
     ```
 
-2. **Create and activate a virtual environment**
+4. **Create and activate a virtual environment**
 
     ```sh
     python3 -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     ```
 
-3. **Install dependencies**
+5. **Add your Project ID**
+
+    In `main.py`
+
+   ```sh
+   PROJECT_ID="XXXXXX"
+   ```
+   Replace `XXXXXX` with your project id.
+
+6.  **Install dependencies**
 
     ```sh
     pip install -r requirements.txt
     ```
 
-4. **Run the application**
+7. **Run the application**
 
     ```sh
     python3 main.py
     ```
 
-5. **Access the application**
+8. **Access the application**
 
     Open your browser and navigate to `http://localhost:8080`.
 
@@ -60,12 +80,16 @@ This project can be deployed using Google Cloud Run. Follow these steps:
 
 1. **Build and deploy the service**
 
+   In Google Cloud terminal
+
     ```sh
     cd AI-Powered-StoryTeller
     gcloud run deploy --source=.
     ```
 
-2. **Follow the command prompts to complete the deployment**
+3. **Follow the command prompts to complete the deployment**
+    
+    You will be asked about your deployment name, location and 
 
 ## Usage
 
