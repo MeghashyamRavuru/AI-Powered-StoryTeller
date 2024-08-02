@@ -24,53 +24,56 @@ AI-Powered Story Teller is a web application that generates educational stories 
 
 ### Steps
 
-1. **Install [Google Cloud Cli](https://cloud.google.com/sdk/docs/downloads-snap)**
+1. **Install [Google Cloud CLI](https://cloud.google.com/sdk/docs/downloads-snap)**
+
     ```sh
     snap install google-cloud-cli --classic
     gcloud init
     ```
-    Afterward, you will be prompted to sign in and sign in with your Google Cloud account. Now choose your billing-linked project or create a new project and link with a billing-enabled account.
-   ```sh
-   gcloud auth application-default login
-   ```
-   Again you will prompted to sign in with your Google Cloud account. Complete the sign-in.
 
-3. **Clone the repository**
+    Afterward, you will be prompted to sign in. Sign in with your Google Cloud account. Now choose your billing-linked project or create a new project and link it with a billing-enabled account.
+
+    ```sh
+    gcloud auth application-default login
+    ```
+
+    You will be prompted to sign in with your Google Cloud account again. Complete the sign-in process.
+
+2. **Clone the repository**
 
     ```sh
     git clone https://github.com/MeghashyamRavuru/AI-Powered-StoryTeller.git
     cd AI-Powered-StoryTeller
     ```
 
-4. **Create and activate a virtual environment**
+3. **Create and activate a virtual environment**
 
     ```sh
     python3 -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     ```
 
-5. **Add your Project ID**
+4. **Add your Project ID**
 
-    In `main.py`
+    In `main.py`, replace `XXXXXX` with your project ID:
 
-   ```sh
-   PROJECT_ID="XXXXXX"
-   ```
-   Replace `XXXXXX` with your project id.
+    ```python
+    PROJECT_ID = "XXXXXX"
+    ```
 
-6.  **Install dependencies**
+5. **Install dependencies**
 
     ```sh
     pip install -r requirements.txt
     ```
 
-7. **Run the application**
+6. **Run the application**
 
     ```sh
     python3 main.py
     ```
 
-8. **Access the application**
+7. **Access the application**
 
     Open your browser and navigate to `http://localhost:8080`.
 
@@ -78,20 +81,24 @@ AI-Powered Story Teller is a web application that generates educational stories 
 
 This project can be deployed using Google Cloud Run. Follow these steps:
 
-- **Build and deploy the service**
+1. **Build and deploy the service**
 
-   In Google Cloud terminal
-   
+    In the Google Cloud terminal, run:
+
     ```sh
     cd AI-Powered-StoryTeller
     gcloud run deploy --source=.
     ```
 
-    It will prompt you to enter a name for your service, let's say "ai". Choose the corresponding number for the region "us-central1"(Choose your preferred location). Say "y" when it asks if you want to allow unauthenticated invocations. Note that we are allowing unauthenticated access here because this is a demo application. Recommendation is to use appropriate authentication for your enterprise and production applications.
+    You will be prompted to enter a name for your service (e.g., "ai"). Choose the corresponding number for the region (e.g., "us-central1" or your preferred location). Say "y" when asked if you want to allow unauthenticated invocations. Note that we are allowing unauthenticated access here because this is a demo application. It is recommended to use appropriate authentication for enterprise and production applications.
 
-   Once the deployment is complete, you should get a link similar to the one below:
+2. **Access the deployed service**
 
-   https://ai-*****eua-uc.a.run.app/
+    Once the deployment is complete, you should get a link similar to:
+
+    ```
+    https://ai-*****eua-uc.a.run.app/
+    ```
 
 ## Usage
 
