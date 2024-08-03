@@ -64,7 +64,7 @@ AI-Powered Story Teller is a web application that generates educational stories 
 5. **Install dependencies**
 
     ```sh
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
     ```
 
 6. **Run the application**
